@@ -7,6 +7,7 @@ import urlparse
 import threading
 import json
 from functools import wraps
+import re
 from lazy import lazy
 
 from logging import getLogger
@@ -215,10 +216,16 @@ class StubHttpRequestHandler(BaseHTTPRequestHandler, object):
         `format_str` is a string with old-style Python format escaping;
         `args` is an array of values to fill into the string.
         """
+
+        # BaseHTTPRequestHandler uses a standard printf-style format string.
+        # If format_string has percent sign then the old-style format will raise TypeError.
+        # Escape all percent signs in format_str except %s.
+        message = re.sub(r'(%(?!s))', '%%', format_str)
+
         return u"{0} - - [{1}] {2}\n".format(
             self.client_address[0],
             self.log_date_time_string(),
-            format_str % args
+            message % args
         )
 
 
@@ -236,7 +243,7 @@ class StubHttpService(HTTPServer, object):
         Configure the server to listen on localhost.
         Default is to choose an arbitrary open port.
         """
-        address = ('127.0.0.1', port_num)
+        address = ('0.0.0.0', port_num)
         HTTPServer.__init__(self, address, self.HANDLER_CLASS)
 
         # Create a dict to store configuration values set by the client
