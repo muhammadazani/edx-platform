@@ -98,9 +98,10 @@ class @Sequence
       @el.trigger "sequence:change"
       @mark_active new_position
       @$('#seq_content').html @contents.eq(new_position - 1).text()
+      
       XBlock.initializeBlocks(@$('#seq_content'))
 
-      MathJax.Hub.Queue(["Typeset", MathJax.Hub, "seq_content"]) # NOTE: Actually redundant. Some other MathJax call also being performed
+      # MathJax.Hub.Queue(["Typeset", MathJax.Hub, "seq_content"]) # NOTE: Actually redundant. Some other MathJax call also being performed
       window.update_schematics() # For embedded circuit simulator exercises in 6.002x
 
       @position = new_position
@@ -108,9 +109,9 @@ class @Sequence
       @hookUpProgressEvent()
       @updatePageTitle()
 
+      @$('#seq_content').attr("aria-labelledby", "tab_" + (new_position - 1))
       sequence_links = @$('#seq_content a.seqnav')
       sequence_links.click @goto
-    @$("a.active").blur()
 
   goto: (event) =>
     event.preventDefault()
@@ -187,8 +188,10 @@ class @Sequence
     .addClass("visited")
 
   mark_active: (position) ->
+    @$("#sequence-list a").attr("aria-selected", "false")
     # Don't overwrite class attribute to avoid changing Progress class
     element = @link_for(position)
     element.removeClass("inactive")
     .removeClass("visited")
     .addClass("active")
+    .attr("aria-selected", "true")
