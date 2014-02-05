@@ -22,27 +22,26 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
             var self = this;
             this.collection.each(
                 function (model) {
+
                     var data = {
-                        el: self.$el.find('.metadata_entry')[counter++],
-                        model: model
-                    };
-                    if (model.getType() === MetadataModel.SELECT_TYPE) {
-                        new Metadata.Option(data);
+                            el: self.$el.find('.metadata_entry')[counter++],
+                            model: model
+                        },
+                        conversions = {
+                            'Select': 'Option',
+                            'Float': 'Number',
+                            'Integer': 'Number'
+                        },
+                        type = model.getType();
+
+
+                    if (conversions[type]) {
+                        type = conversions[type];
                     }
-                    else if (model.getType() === MetadataModel.INTEGER_TYPE ||
-                        model.getType() === MetadataModel.FLOAT_TYPE) {
-                        new Metadata.Number(data);
-                    }
-                    else if(model.getType() === MetadataModel.LIST_TYPE) {
-                        new Metadata.List(data);
-                    }
-                    else if(model.getType() === MetadataModel.VIDEO_LIST_TYPE) {
-                        new VideoList(data);
-                    }
-                    else if(model.getType() === MetadataModel.RELATIVE_TIME_TYPE) {
-                        new Metadata.RelativeTime(data);
-                    }
-                    else {
+
+                    if (_.isFunction(Metadata[type])) {
+                        new Metadata[type](data);
+                    } else {
                         // Everything else is treated as GENERIC_TYPE, which uses String editor.
                         new Metadata.String(data);
                     }
@@ -83,6 +82,8 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
             return displayName;
         }
     });
+
+    Metadata.VideoList = VideoList;
 
     Metadata.String = AbstractEditor.extend({
 
@@ -383,6 +384,65 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
             }
 
             this.$el.find('input').val(value);
+        }
+    });
+
+    Metadata.Dict = Metadata.List.extend({
+
+        templateName: "metadata-dict-entry",
+
+        getValueFromEditor: function () {
+            var dict = {};
+
+            _.each(this.$el.find('li'), function(li, index) {
+                var key = $(li).find('.input-key').val().trim(),
+                    value = $(li).find('.input-value').val().trim();
+
+                // Keys should be unique, so if our keys are duplicated and
+                // second key is empty, do nothing. Otherwise, it'll be
+                // overwritten by the new value.
+                if (key in dict && value === '') return;
+                dict[key] = value;
+            });
+
+            return dict;
+        },
+
+        setValueInEditor: function (value) {
+            var list = this.$el.find('ol'),
+                frag = document.createDocumentFragment();
+
+            _.each(value, function(value, key) {
+                var template = _.template(
+                    '<li class="list-settings-item">' +
+                        '<input type="text" class="input input-key" value="<%= key %>">' +
+                        '<input type="text" class="input input-value" value="<%= value %>">' +
+                        '<a href="#" class="remove-action remove-setting" data-value="<%= value %>"><i class="icon-remove-sign"></i><span class="sr">Remove</span></a>' +
+                    '</li>'
+                );
+
+                frag.appendChild($(template({'key': key, 'value': value}))[0]);
+            });
+
+            list.html([frag]);
+        },
+
+        addEntry: function(event) {
+            event.preventDefault();
+            // We don't call updateModel here since it's bound to the
+            // change event
+            var dict = this.model.get('value') || {};
+            dict[''] = '';
+            this.setValueInEditor(dict);
+            this.$el.find('.create-setting').addClass('is-disabled');
+        },
+
+        removeEntry: function(event) {
+            event.preventDefault();
+            var entry = $(event.currentTarget).siblings('.input-key').val();
+            this.setValueInEditor(_.omit(this.model.get('value'), entry));
+            this.updateModel();
+            this.$el.find('.create-setting').removeClass('is-disabled');
         }
     });
 
