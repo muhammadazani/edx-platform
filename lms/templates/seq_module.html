@@ -13,13 +13,12 @@
         ## Make sure it gets updated after ajax calls.
         ## implementation note: will need to figure out how to handle combining detail
         ## statuses of multiple modules in js.
-        <li aria-label="${item['title']}">
+        <li>
         <a class="seq_${item['type']} inactive progress-${item['progress_status']}"
            data-id="${item['id']}"
            data-element="${idx+1}"
-           data-title="${item['title']}"
            href="javascript:void(0);"
-           title="${item['title']}"
+           title="${item['title']|h}"
            aria-controls="seq_contents_${idx}"
            id="tab_${idx}"
            tabindex="0"
@@ -40,12 +39,11 @@
   <div id="seq_contents_${idx}" 
        aria-labelledby="tab_${idx}"
        aria-hidden="true"
-       role="tabpanel" 
        class="seq_contents tex2jax_ignore asciimath2jax_ignore">
      ${item['content'] | h}
   </div>
   % endfor
-  <div id="seq_content" role="tabpanel" aria-hidden="false"></div>
+  <div id="seq_content" role="tabpanel"></div>
 
   <nav class="sequence-bottom">
     <ul aria-label="${_('Section Navigation')}" class="sequence-nav-buttons">
