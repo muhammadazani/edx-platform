@@ -159,7 +159,7 @@ def add_histogram(user, block, view, frag, context):  # pylint: disable=unused-a
         return frag
 
     block_id = block.id
-    if block.has_score:
+    if block.has_score and settings.FEATURES.get('DISPLAY_HISTOGRAMS_TO_STAFF'):
         histogram = grade_histogram(block_id)
         render_histogram = len(histogram) > 0
     else:
