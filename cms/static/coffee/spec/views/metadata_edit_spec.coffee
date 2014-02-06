@@ -509,7 +509,7 @@ define ["js/models/metadata", "js/collections/metadata", "js/views/metadata", "c
           it "has an update model method", ->
               assertUpdateModel(@view, '12:12:12', '23:59:59')
 
-      describe "MetadataView.Dict allows the user to enter an ordered list of strings", ->
+      describe "MetadataView.Dict allows the user to enter key-value pairs of strings", ->
         beforeEach ->
           dictModel = new MetadataModel($.extend(true, {}, dictEntry))
           @dictView = new MetadataView.Dict({model: dictModel})
@@ -557,7 +557,6 @@ define ["js/models/metadata", "js/collections/metadata", "js/views/metadata", "c
           expect(@el.find('input.input-key').length).toEqual(5)
 
         it "only allows unique keys", ->
-
           data = [
             {
               expectedValue: {'ru': 'Русский'},
@@ -574,11 +573,16 @@ define ["js/models/metadata", "js/collections/metadata", "js/views/metadata", "c
                 'key': 'ru'
                 'value': 'Русский'
               }
+            },
+            {
+              expectedValue: {'ru': 'Русский'},
+              initialValue: {'ru': 'Русский'},
+              testValue: {
+                'key': ''
+                'value': ''
+              }
             }
           ]
-
-          dictView = @dictView
-          el = @el
 
           _.each data, ((d, index) ->
             @dictView.setValueInEditor(d.initialValue)
@@ -598,7 +602,3 @@ define ["js/models/metadata", "js/collections/metadata", "js/views/metadata", "c
           @el.find('input.input-key').last().val('third setting')
           @el.find('input.input-key').last().trigger('input')
           expect(@el.find('.create-setting')).not.toHaveClass('is-disabled')
-
-
-
-

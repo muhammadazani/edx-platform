@@ -22,7 +22,6 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
             var self = this;
             this.collection.each(
                 function (model) {
-
                     var data = {
                             el: self.$el.find('.metadata_entry')[counter++],
                             model: model
@@ -33,7 +32,6 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
                             'Integer': 'Number'
                         },
                         type = model.getType();
-
 
                     if (conversions[type]) {
                         type = conversions[type];
@@ -387,7 +385,16 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
         }
     });
 
-    Metadata.Dict = Metadata.List.extend({
+    Metadata.Dict = AbstractEditor.extend({
+
+        events : {
+            "click .setting-clear" : "clear",
+            "keypress .setting-input" : "showClearButton",
+            "change input" : "updateModel",
+            "input input" : "enableAdd",
+            "click .create-setting" : "addEntry",
+            "click .remove-setting" : "removeEntry"
+        },
 
         templateName: "metadata-dict-entry",
 
@@ -399,9 +406,14 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
                     value = $(li).find('.input-value').val().trim();
 
                 // Keys should be unique, so if our keys are duplicated and
-                // second key is empty, do nothing. Otherwise, it'll be
-                // overwritten by the new value.
-                if (key in dict && value === '') return;
+                // second key is empty or key and value are empty just do
+                // nothing. Otherwise, it'll be overwritten by the new value.
+                if (value === '') {
+                    if (key === '' || key in dict) {
+                        return false;
+                    }
+                }
+
                 dict[key] = value;
             });
 
@@ -442,6 +454,10 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
             var entry = $(event.currentTarget).siblings('.input-key').val();
             this.setValueInEditor(_.omit(this.model.get('value'), entry));
             this.updateModel();
+            this.$el.find('.create-setting').removeClass('is-disabled');
+        },
+
+        enableAdd: function() {
             this.$el.find('.create-setting').removeClass('is-disabled');
         }
     });
