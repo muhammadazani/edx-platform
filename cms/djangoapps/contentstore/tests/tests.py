@@ -121,15 +121,17 @@ class AuthTestCase(ContentStoreTestCase):
         self.create_account(self.username, self.email, self.pw)
         self.activate_user(self.email)
 
-    def test_create_account_email_already_exists(self):
-        User.objects.create_user(self.username, self.email, self.pw)
-        resp = self._create_account("abcdef", self.email, "password")
-        self.assertEqual(resp.status_code, 400)
-
     def test_create_account_username_already_exists(self):
         User.objects.create_user(self.username, self.email, self.pw)
         resp = self._create_account(self.username, "abc@def.com", "password")
+        # two users can't have the same username, so this should fail
         self.assertEqual(resp.status_code, 400)
+
+    def test_create_account_email_already_exists(self):
+        User.objects.create_user(self.username, self.email, self.pw)
+        resp = self._create_account("abcdef", self.email, "password")
+        # we can have two users with the same email address, so this should succeed
+        self.assertEqual(resp.status_code, 200)
 
     def test_create_account_pw_already_exists(self):
         User.objects.create_user(self.username, self.email, self.pw)
