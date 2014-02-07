@@ -44,17 +44,15 @@ class ConditionalSteps(object):
         else:
             raise Exception("Unknown condition type: {!r}".format(condition_type))
 
-        metadata = {
-            'xml_attributes': {
-                'sources': world.scenario_dict['CONDITION_SOURCE'].location.url()
-            }
-        }
+        metadata = { 'xml_attributes': {} }
+
         metadata['xml_attributes'][condition] = cond_value
 
         world.scenario_dict['CONDITIONAL'] = world.ItemFactory(
             parent_location=world.scenario_dict['WRAPPER'].location,
             category='conditional',
             display_name="Test Conditional",
+            data = {"sources_list": [world.scenario_dict['CONDITION_SOURCE'].location.url()]},
             metadata=metadata
         )
 
