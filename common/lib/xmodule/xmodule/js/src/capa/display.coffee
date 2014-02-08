@@ -40,16 +40,12 @@ class @Problem
     detail = @el.data('progress_detail')
     status = @el.data('progress_status')
     # i18n
-    progress = "(#{detail} points)"
+    `// Translators: %(num_points)s is the number of points; do not translate this!`
+    progress = interpolate(gettext("%(num_points)s points)"), {'num_points': detail}, true)
     if status == 'none' and detail? and detail.indexOf('/') > 0
         a = detail.split('/')
         possible = parseFloat(a[1])
-        if possible == 1
-            # i18n
-            progress = "(#{possible} point possible)"
-        else
-            # i18n
-            progress = "(#{possible} points possible)"
+        progress = interpolate(ungettext("%(possible)s point possible", "%(possible)s points possible", possible), {'possible': possible}, true)
     @$('.problem-progress').html(progress)
 
   updateProgress: (response) =>
