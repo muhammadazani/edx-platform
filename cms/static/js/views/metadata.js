@@ -276,6 +276,7 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
 
         setValueInEditor: function (value) {
             var list = this.$el.find('ol');
+
             list.empty();
             _.each(value, function(ele, index) {
                 var template = _.template(
@@ -307,6 +308,13 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
 
         enableAdd: function() {
             this.$el.find('.create-setting').removeClass('is-disabled');
+        },
+
+        clear: function() {
+            AbstractEditor.prototype.clear.apply(this, arguments);
+            if (_.isNull(this.model.getValue())) {
+                this.$el.find('.create-setting').removeClass('is-disabled');
+            }
         }
     });
 
@@ -443,7 +451,7 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
             event.preventDefault();
             // We don't call updateModel here since it's bound to the
             // change event
-            var dict = this.model.get('value') || {};
+            var dict = $.extend(true, {}, this.model.get('value')) || {};
             dict[''] = '';
             this.setValueInEditor(dict);
             this.$el.find('.create-setting').addClass('is-disabled');
@@ -459,6 +467,13 @@ function(BaseView, _, MetadataModel, AbstractEditor, VideoList) {
 
         enableAdd: function() {
             this.$el.find('.create-setting').removeClass('is-disabled');
+        },
+
+        clear: function() {
+            AbstractEditor.prototype.clear.apply(this, arguments);
+            if (_.isNull(this.model.getValue())) {
+                this.$el.find('.create-setting').removeClass('is-disabled');
+            }
         }
     });
 
