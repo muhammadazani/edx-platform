@@ -293,9 +293,13 @@ function (VideoPlayer, VideoStorage) {
                     'autoplay': isBoolean,
                     'autohideHtml5': isBoolean,
                     'position': function (value) {
-                        return  storage.getItem('position', true) ||
-                                Number(value) ||
-                                0;
+                        console.log('[conversions::position]: storage.getItem("position") = ', storage.getItem('position', true));
+                        console.log('[conversions::position]: Number(value) = ', Number(value));
+                        console.log('[conversions::position]: 0 = ', 0);
+
+                        return storage.getItem('position', true) ||
+                            Number(value) ||
+                            0;
                     },
                     'speed': function (value) {
                         return storage.getItem('speed', true) || value;
@@ -685,10 +689,21 @@ function (VideoPlayer, VideoStorage) {
         }
 
         if (data.position) {
-            this.storage.setItem('position', data.position, true);
+            if (data.position <= 3) {
+                delete data.position;
 
-            data.position = Time.formatFull(data.position);
+                if (!data.speed) {
+                    return;
+                }
+            } else {
+                this.storage.setItem('position', data.position, true);
+
+                data.position = Time.formatFull(data.position);
+            }
         }
+
+        console.log('[saveState]: position = ', data.position);
+        console.log('[saveState]: speed = ', data.speed);
 
         $.ajax({
             url: this.config.saveStateUrl,

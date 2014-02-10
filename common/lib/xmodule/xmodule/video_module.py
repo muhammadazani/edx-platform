@@ -186,18 +186,21 @@ class VideoModule(VideoFields, XModule):
     js_module_name = "Video"
 
     def handle_ajax(self, dispatch, data):
-        ACCEPTED_KEYS = ['speed', 'position']
+        ACCEPTED_KEYS = ['speed', u'speed', 'position', u'position']
 
         if dispatch == 'save_user_state':
             for key in data:
                 if hasattr(self, key) and key in ACCEPTED_KEYS:
-                    if key == 'position':
+                    if key == 'position' or key == u'position':
                         relative_position = RelativeTime.isotime_to_timedelta(data[key])
-                        setattr(self, key, relative_position)
-                    else:
-                        setattr(self, key, json.loads(data[key]))
-                    if key == 'speed':
+                        # setattr(self, key, relative_position)
+                        self.position = relative_position
+                    # else:
+                    #     setattr(self, key, json.loads(data[key]))
+                    if key == 'speed' or key == u'speed':
                         self.global_speed = self.speed
+
+            log.debug(u"Test.")
 
             return json.dumps({'success': True})
 
@@ -225,6 +228,7 @@ class VideoModule(VideoFields, XModule):
             elif self.sub:
                 track_url = self.runtime.handler_url(self, 'download_transcript')
 
+        import ipdb; ipdb.set_trace()
         return self.system.render_template('video.html', {
             'ajax_url': self.system.ajax_url + '/save_user_state',
             'autoplay': settings.FEATURES.get('AUTOPLAY_VIDEOS', False),

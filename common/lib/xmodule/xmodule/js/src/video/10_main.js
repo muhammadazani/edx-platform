@@ -79,7 +79,7 @@ function (
         // Store new state for future invocation of this module consturctor function.
         if (previousState && previousState.videoPlayer) {
             previousState.saveState(true);
-            $(window).off('unload', previousState.saveState);
+            // $(window).off('unload', previousState.saveState);
         }
 
         state = {};
