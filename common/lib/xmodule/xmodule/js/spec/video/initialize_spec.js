@@ -7,7 +7,7 @@ require(
 function (Initialize) {
     describe('Initialize', function () {
         describe('saveState function', function () {
-            var state, testData, videoPlayerCurrentTime, newCurrentTime, speed;
+            var state, videoPlayerCurrentTime, newCurrentTime, speed;
 
             // We make sure that `currentTime` is a float. We need to test
             // that Math.round() is called.
@@ -22,59 +22,6 @@ function (Initialize) {
             newCurrentTime = 5.4;
 
             speed = '0.75';
-
-            testData = [{
-                itDescription: 'data is not an object, async is true',
-                asyncVal: true,
-                speedVal: undefined,
-                positionVal: videoPlayerCurrentTime,
-                data: undefined,
-                ajaxData: {
-                    position: Time.formatFull(Math.round(videoPlayerCurrentTime))
-                }
-            }, {
-                itDescription: 'data contains speed, async is false',
-                asyncVal: false,
-                speedVal: speed,
-                positionVal: undefined,
-                data: {
-                    speed: speed
-                },
-                ajaxData: {
-                    speed: speed
-                }
-            }, {
-                itDescription: 'data contains float position, async is true',
-                asyncVal: true,
-                speedVal: undefined,
-                positionVal: newCurrentTime,
-                data: {
-                    position: newCurrentTime
-                },
-                ajaxData: {
-                    position: Time.formatFull(Math.round(newCurrentTime))
-                }
-            }, {
-                itDescription: 'data contains speed and rounded position, async is false',
-                asyncVal: false,
-                speedVal: speed,
-                positionVal: Math.round(newCurrentTime),
-                data: {
-                    speed: speed,
-                    position: Math.round(newCurrentTime)
-                },
-                ajaxData: {
-                    speed: speed,
-                    position: Time.formatFull(Math.round(newCurrentTime))
-                }
-            }, {
-                itDescription: 'data contains empty object, async is true',
-                asyncVal: true,
-                speedVal: undefined,
-                positionVal: undefined,
-                data: {},
-                ajaxData: {}
-            }];
 
             beforeEach(function () {
                 state = {
@@ -97,42 +44,108 @@ function (Initialize) {
                 state = undefined;
             });
 
-            $.each(testData, function (index, value) {
-                it(value.itDescription, function () {
-                    var asyncVal    = value.asyncVal,
-                        speedVal    = value.speedVal,
-                        positionVal = value.positionVal,
-                        data        = value.data,
-                        ajaxData    = value.ajaxData;
-
-                    Initialize.prototype.saveState.call(state, asyncVal, data);
-
-                    if (speedVal) {
-                        expect(state.storage.setItem).toHaveBeenCalledWith(
-                            'speed',
-                            speedVal,
-                            true
-                        );
+            it('data is not an object, async is true', function () {
+                itSpec({
+                    asyncVal: true,
+                    speedVal: undefined,
+                    positionVal: videoPlayerCurrentTime,
+                    data: undefined,
+                    ajaxData: {
+                        position: Time.formatFull(Math.round(videoPlayerCurrentTime))
                     }
-                    if (positionVal) {
-                        expect(state.storage.setItem).toHaveBeenCalledWith(
-                            'position',
-                            positionVal,
-                            true
-                        );
-                        expect(Time.formatFull).toHaveBeenCalledWith(
-                            positionVal
-                        );
-                    }
-                    expect($.ajax).toHaveBeenCalledWith({
-                        url: state.config.saveStateUrl,
-                        type: 'POST',
-                        async: asyncVal,
-                        dataType: 'json',
-                        data: ajaxData
-                    });
                 });
             });
+
+            it('data contains speed, async is false', function () {
+                itSpec({
+                    asyncVal: false,
+                    speedVal: speed,
+                    positionVal: undefined,
+                    data: {
+                        speed: speed
+                    },
+                    ajaxData: {
+                        speed: speed
+                    }
+                });
+            });
+
+            it('data contains float position, async is true', function () {
+                itSpec({
+                    asyncVal: true,
+                    speedVal: undefined,
+                    positionVal: newCurrentTime,
+                    data: {
+                        position: newCurrentTime
+                    },
+                    ajaxData: {
+                        position: Time.formatFull(Math.round(newCurrentTime))
+                    }
+                });
+            });
+
+            it('data contains speed and rounded position, async is false', function () {
+                itSpec({
+                    asyncVal: false,
+                    speedVal: speed,
+                    positionVal: Math.round(newCurrentTime),
+                    data: {
+                        speed: speed,
+                        position: Math.round(newCurrentTime)
+                    },
+                    ajaxData: {
+                        speed: speed,
+                        position: Time.formatFull(Math.round(newCurrentTime))
+                    }
+                });
+            });
+
+            it('data contains empty object, async is true', function () {
+                itSpec({
+                    asyncVal: true,
+                    speedVal: undefined,
+                    positionVal: undefined,
+                    data: {},
+                    ajaxData: {}
+                });
+            });
+
+            return;
+
+            function itSpec(value) {
+                var asyncVal    = value.asyncVal,
+                    speedVal    = value.speedVal,
+                    positionVal = value.positionVal,
+                    data        = value.data,
+                    ajaxData    = value.ajaxData;
+
+                Initialize.prototype.saveState.call(state, asyncVal, data);
+
+                if (speedVal) {
+                    expect(state.storage.setItem).toHaveBeenCalledWith(
+                        'speed',
+                        speedVal,
+                        true
+                    );
+                }
+                if (positionVal) {
+                    expect(state.storage.setItem).toHaveBeenCalledWith(
+                        'position',
+                        positionVal,
+                        true
+                    );
+                    expect(Time.formatFull).toHaveBeenCalledWith(
+                        positionVal
+                    );
+                }
+                expect($.ajax).toHaveBeenCalledWith({
+                    url: state.config.saveStateUrl,
+                    type: 'POST',
+                    async: asyncVal,
+                    dataType: 'json',
+                    data: ajaxData
+                });
+            }
         });
     });
 
